@@ -10,6 +10,7 @@ var serverPort = (process.env.PORT  || 4443);
 var https = require('https');
 var http = require('http');
 var server;
+var avaliable;
 if (process.env.LOCAL) {
   server = https.createServer(options, app);
 } else {
@@ -23,6 +24,12 @@ app.get('/', function(req, res){
   console.log('get /');
   res.sendFile(__dirname + '/index.html');
 });
+
+app.get('/callcenter', function(req, res){
+  console.log('get /callcenter');
+  res.sendFile(__dirname + '/callcenter.html');
+});
+
 server.listen(serverPort, function(){
   console.log('server up and running at %s port', serverPort);
   if (process.env.LOCAL) {
@@ -33,12 +40,14 @@ server.listen(serverPort, function(){
 function socketIdsInRoom(name) {
   var socketIds = io.nsps['/'].adapter.rooms[name];
   if (socketIds) {
+    console.log('socketIds not null');
     var collection = [];
     for (var key in socketIds) {
       collection.push(key);
     }
     return collection;
   } else {
+    console.log('socketIds is null');
     return [];
   }
 }
@@ -60,6 +69,8 @@ io.on('connection', function(socket){
     callback(socketIds);
     socket.join(name);
     socket.room = name;
+    //var socketIds = io.nsps['/'].adapter.rooms[name];
+    //console.log('socketIds: ', socketIds);
   });
 
 

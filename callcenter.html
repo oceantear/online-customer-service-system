@@ -59,7 +59,6 @@ function join(roomID) {
   socket.emit('join', roomID, function(socketIds){
     console.log('join', socketIds);
     for (var i in socketIds) {
-      //console.log('createPC');
       var socketId = socketIds[i];
       createPC(socketId, true);
     }
@@ -67,7 +66,6 @@ function join(roomID) {
 }
 
 function createPC(socketId, isOffer) {
-  console.log('createPC', socketId);	
   var pc = new RTCPeerConnection(configuration);
   pcPeers[socketId] = pc;
 
@@ -157,20 +155,14 @@ function exchange(data) {
   if (data.sdp) {
     console.log('exchange sdp', data);
     pc.setRemoteDescription(new RTCSessionDescription(data.sdp), function () {
-        console.log('pc.remoteDescription.type = ',pc.remoteDescription.type);
-      if (pc.remoteDescription.type == "offer"){
-          console.log('offeeeeeeeer')
-          pc.createAnswer(function(desc) {
-            console.log('createAnswer', desc);
-            pc.setLocalDescription(desc, function () {
-                console.log('setLocalDescription', pc.localDescription);
-                socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
-            }, logError);
+      if (pc.remoteDescription.type == "offer")
+        pc.createAnswer(function(desc) {
+          console.log('createAnswer', desc);
+          pc.setLocalDescription(desc, function () {
+            console.log('setLocalDescription', pc.localDescription);
+            socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
           }, logError);
-      
-      }else {
-          console.log('not offer')      
-      }
+        }, logError);
     }, logError);
   } else {
     console.log('exchange candidate', data);
