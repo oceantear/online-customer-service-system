@@ -11,6 +11,7 @@ var https = require('https');
 var http = require('http');
 var server;
 var avaliable;
+var SocketIdAvaiableArray = [];
 if (process.env.LOCAL) {
   server = https.createServer(options, app);
 } else {
@@ -20,14 +21,14 @@ var io = require('socket.io')(server);
 
 var roomList = {};
 
-app.get('/', function(req, res){
-  console.log('get /');
-  res.sendFile(__dirname + '/index.html');
+app.get('/callee', function(req, res){
+  console.log('get /callee');
+  res.sendFile(__dirname + '/callee.html');
 });
 
-app.get('/callcenter', function(req, res){
-  console.log('get /callcenter');
-  res.sendFile(__dirname + '/callcenter.html');
+app.get('/caller', function(req, res){
+  console.log('get /caller');
+  res.sendFile(__dirname + '/caller.html');
 });
 
 server.listen(serverPort, function(){
@@ -63,21 +64,75 @@ io.on('connection', function(socket){
     }
   });
 
-  socket.on('join', function(name, callback){
-    console.log('join', name);
-    var socketIds = socketIdsInRoom(name);
-    callback(socketIds);
+  socket.on('calleejoin', function(name){
+    console.log('calleejoin');
+    //var socketIds = socketIdsInRoom(name);
+    //callback(socketIds);
+    
     socket.join(name);
     socket.room = name;
+
+    var socketIds = io.nsps['/'].adapter.rooms[name];
+    var collection = [];
+    for (var key in socketIds) {
+      console.log('key soceket : ',key);
+      collection.push(key);
+    }
+
+    //console.log('socketId =',socketId);
+    if(socketIds){
+      var obj = {
+        RoomId : name,
+        SocketId : collection[0],
+        Avaliable : 1
+      };
+    }
+    console.log('obj.roomId =',obj.RoomId);
+    console.log('obj.socketId =',obj.SocketId);
+    console.log('obj.avaliable =',obj.Avaliable);
+    SocketIdAvaiableArray.push(obj);
+    
+    for (var i in SocketIdAvaiableArray){
+      var obj = SocketIdAvaiableArray[i];
+      console.log('obj.roomId =',obj.RoomId);
+      console.log('obj.socketId =',obj.SocketId);
+      console.log('obj.avaliable =',obj.Avaliable);
+    }
+    
     //var socketIds = io.nsps['/'].adapter.rooms[name];
     //console.log('socketIds: ', socketIds);
   });
 
 
+  
+  socket.on('join', function(callback){
+    console.log('caller join');
+    //var socketIds = socketIdsInRoom(name);
+    var socketIds = [];
+    for (var i in SocketIdAvaiableArray){
+      var obj = SocketIdAvaiableArray[i];
+      if(obj.Avaliable == 1){
+        socketId = obj.SocketId;
+        console.log('socketId =',socketId);
+        socketIds.push(socketId);
+      }
+    }
+    callback(socketIds);
+    //socket.join(name);
+    //socket.room = name;
+    //var socketIds = io.nsps['/'].adapter.rooms[name];
+    //console.log('socketIds: ', socketIds);
+  });
+
+
+
+
   socket.on('exchange', function(data){
     console.log('exchange', data);
     data.from = socket.id;
+    console.log('exchange: from = ', data.from);
     var to = io.sockets.connected[data.to];
+    console.log('exchange: to = ', data.to);
     to.emit('exchange', data);
   });
 });
