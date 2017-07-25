@@ -69,9 +69,15 @@ function getLocalStream() {
 function join() {
   socket.emit('callerjoin', function(socketIds){
     console.log('join', socketIds);
+    
     var socketId = socketIds[0];
-    console.log('caller join: socketId = ',socketId);
-    createPC(socketId, true);
+    if(typeof socketId !== 'undefined' && socketId){
+        console.log('caller join: socketId = ',socketId);
+        createPC(socketId, true);
+    }else{
+        console.log('NO free room');
+        alert("All operator is busy. Please call later!");
+    }
     /*for (var i in socketIds) {
       //console.log('createPC');
       var socketId = socketIds[i];

@@ -56,13 +56,30 @@ function socketIdsInRoom(name) {
 io.on('connection', function(socket){
   console.log('connection');
   socket.on('disconnect', function(){
-    console.log('disconnect');
+    console.log('disconnect:() socket.id = ',socket.id);
+      console.log('disconnect:() socket.room = ',socket.room);
     if (socket.room) {
       var room = socket.room;
+      console.log('disconnect:() room =' ,room);
       io.to(room).emit('leave', socket.id);
       socket.leave(room);
+        
+      for (var i in SocketIdAvaiableArray){
+      var obj = SocketIdAvaiableArray[i];
+      if(obj.RoomId == room){
+        SocketIdAvaiableArray[i].Avaliable = 1;
+      }
+    }
     }
   });
+    
+    /*socket.on('join', function(name, callback){
+        console.log('join', name);
+        var socketIds = socketIdsInRoom(name);
+        callback(socketIds);
+        socket.join(name);
+        socket.room = name;
+    });*/
 
   socket.on('calleejoin', function(name){
     console.log('calleejoin');
@@ -114,10 +131,13 @@ io.on('connection', function(socket){
       if(obj.Avaliable == 1){
         socketId = obj.SocketId;
         console.log('socketId =',socketId);
-        socketIds.push(socketId);
+        socketIds.push(socketId);  
+        socket.room = obj.RoomId;
+        SocketIdAvaiableArray[i].Avaliable = 0;
       }
     }
     callback(socketIds);
+    
     //socket.join(name);
     //socket.room = name;
     //var socketIds = io.nsps['/'].adapter.rooms[name];

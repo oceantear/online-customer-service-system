@@ -182,6 +182,7 @@ function leave(socketId) {
   pc.close();
   delete pcPeers[socketId];
   var video = document.getElementById("remoteView" + socketId);
+  console.log('leave : video = ',video);
   if (video) video.remove();
 }
 
