@@ -177,7 +177,7 @@ function exchange(data) {
 }
 
 function leave(socketId) {
-  console.log('leave', socketId);
+  console.log('callee leave', socketId);
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];

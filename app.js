@@ -55,21 +55,25 @@ function socketIdsInRoom(name) {
 
 io.on('connection', function(socket){
   console.log('connection');
+    
   socket.on('disconnect', function(){
     console.log('disconnect:() socket.id = ',socket.id);
-      console.log('disconnect:() socket.room = ',socket.room);
+    console.log('disconnect:() socket.room = ',socket.room);
     if (socket.room) {
-      var room = socket.room;
-      console.log('disconnect:() room =' ,room);
-      io.to(room).emit('leave', socket.id);
-      socket.leave(room);
+        var room = socket.room;
+        console.log('disconnect:() room =' ,room);
+        io.to(room).emit('leave', socket.id);
+        socket.leave(room);
         
-      for (var i in SocketIdAvaiableArray){
-      var obj = SocketIdAvaiableArray[i];
-      if(obj.RoomId == room){
-        SocketIdAvaiableArray[i].Avaliable = 1;
-      }
-    }
+        for (var i in SocketIdAvaiableArray){
+            var obj = SocketIdAvaiableArray[i];
+            if(obj.SocketId == socket.id){
+                console.log('room owner leave!!!');
+                delete SocketIdAvaiableArray[i];
+            }else if(obj.RoomId == room){
+                SocketIdAvaiableArray[i].Avaliable = 1;
+            }
+        }
     }
   });
     
