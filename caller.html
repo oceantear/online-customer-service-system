@@ -15,7 +15,7 @@
 <video id="selfView" autoplay></video>
 <div id="remoteViewContainer"></div>
 <div id="roomIDContainer">
-  <input id="roomID" value="abc">
+  <!--<input id="roomID" value="abc"> -->
   <button onclick="press();">Join/Create room</button>
 </div>
 </body>
@@ -67,7 +67,7 @@ function getLocalStream() {
 }*/
 
 function join() {
-  socket.emit('join', function(socketIds){
+  socket.emit('callerjoin', function(socketIds){
     console.log('join', socketIds);
     var socketId = socketIds[0];
     console.log('caller join: socketId = ',socketId);
@@ -218,6 +218,7 @@ function logError(error) {
 }
 
 function press() {
+    /*
    roomID = document.getElementById('roomID').value;
   if (roomID == "") {
     alert('Please enter room ID');
@@ -227,6 +228,8 @@ function press() {
     roomIDContainer.parentElement.removeChild(roomIDContainer);
     join();
   }
+    */
+    join();
 }
 function textRoomPress() {
   var text = document.getElementById('textRoomInput').value;

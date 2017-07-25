@@ -105,7 +105,7 @@ io.on('connection', function(socket){
 
 
   
-  socket.on('join', function(callback){
+  socket.on('callerjoin', function(callback){
     console.log('caller join');
     //var socketIds = socketIdsInRoom(name);
     var socketIds = [];
