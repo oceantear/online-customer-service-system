@@ -74,6 +74,7 @@ function join() {
     if(typeof socketId !== 'undefined' && socketId){
         console.log('caller join: socketId = ',socketId);
         createPC(socketId, true);
+        roomIDContainer.style.display = "none";
     }else{
         console.log('NO free room');
         alert("All operator is busy. Please call later!");
@@ -200,6 +201,7 @@ function exchange(data) {
 
 function leave(socketId) {
   console.log('leave', socketId);
+  alert("operator offline!!!!");
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];

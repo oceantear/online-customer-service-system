@@ -198,7 +198,18 @@ socket.on('connect', function(data) {
   console.log('connect');
   getLocalStream();
 });
-
+    
+socket.on('duplicatedRoomId',function(data) {
+  console.log('duplicatedRoomId');
+  
+  var roomIDContainer = document.getElementById('roomIDContainer');
+  console.log('roomIDContainer = ',roomIDContainer);
+      
+  roomIDContainer.style.display = "inline";
+  alert("duplicated Room Id!!!!");
+});
+    
+    
 function logError(error) {
   console.log("logError", error);
 }
@@ -209,7 +220,8 @@ function press() {
     alert('Please enter room ID');
   } else {
     var roomIDContainer = document.getElementById('roomIDContainer');
-    roomIDContainer.parentElement.removeChild(roomIDContainer);
+    //roomIDContainer.parentElement.removeChild(roomIDContainer);
+      roomIDContainer.style.display = "none";
     //join(roomID);
     calleejoin(roomID);
   }
