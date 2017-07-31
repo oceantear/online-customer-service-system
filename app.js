@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 var open = require('open');
+var HashMap = require('hashmap');
 var options = {
   key: fs.readFileSync('./fake-keys/privatekey.pem'),
   cert: fs.readFileSync('./fake-keys/certificate.pem')
@@ -11,6 +12,7 @@ var https = require('https');
 var http = require('http');
 var server;
 var avaliable;
+var SocketIdAvaiableMap = [];
 var SocketIdAvaiableArray = [];
 if (process.env.LOCAL) {
   server = https.createServer(options, app);
@@ -30,6 +32,23 @@ app.get('/caller', function(req, res){
   console.log('get /caller');
   res.sendFile(__dirname + '/caller.html');
 });
+
+app.get('/:custom/:user', function(req, res){
+    console.log('get /callee = ',req.params.custom);
+    //var custom = req.originalUrl.split("/");
+    var html_url = '/'+req.params.custom+'/'+req.params.user+'.html';
+    console.log('html_url = ',html_url);
+    res.sendFile(__dirname + html_url);
+});
+
+/*
+app.get('/:custom/caller', function(req, res){
+    console.log('get /caller');
+    var custom = req.originalUrl.split("/");
+    var html_url = '/'+custom[1]+'/'+custom[2]+'.html';
+  res.sendFile(__dirname + html_url);
+});
+*/
 
 server.listen(serverPort, function(){
   console.log('server up and running at %s port', serverPort);
@@ -67,6 +86,13 @@ io.on('connection', function(socket){
         
         for (var i in SocketIdAvaiableArray){
             var obj = SocketIdAvaiableArray[i];
+            console.log('---------------');
+            console.log('obj.CustomId =',obj.CustomId);
+            console.log('obj.RoomId =',obj.RoomId);
+            console.log('obj.RoomOwnerSocketId =',obj.RoomOwnerSocketId);
+            console.log('obj.Avaliable =',obj.Avaliable);
+            console.log('obj.CallerSocketId =',obj.CallerSocketId);
+
             if(obj.RoomOwnerSocketId == socket.id){
                 console.log('room owner leave!!!:  obj.CallerSocketId = ',obj.CallerSocketId);
                 var to = io.sockets.connected[obj.CallerSocketId];
@@ -79,6 +105,8 @@ io.on('connection', function(socket){
                 SocketIdAvaiableArray.splice(i,1);
                 break;
             }else if(obj.RoomId == room){
+                console.log('---------------');
+                console.log('set obj.RoomId: =',obj.RoomId +' avaliable');
                 SocketIdAvaiableArray[i].Avaliable = 1;
                 SocketIdAvaiableArray[i].CallerSocketId = null;
                 break;
@@ -105,7 +133,7 @@ io.on('connection', function(socket){
       return false;
   }
 
-  socket.on('calleejoin', function(name){
+  socket.on('calleejoin', function(name ,customID){
     console.log('====calleejoin====');
     //var socketIds = socketIdsInRoom(name);
     //callback(socketIds);
@@ -126,12 +154,24 @@ io.on('connection', function(socket){
         if(socketIds){
             console.log('new obj for stroe connectiong info!!');
           var obj = {
+            CustomId : customID,
             RoomId : name,
             RoomOwnerSocketId : collection[0],
             Avaliable : 1,
             CallerSocketId : null
           };
         }
+        //if custom id not in hash map, create one
+        /*if(SocketIdAvaiableMap.get(customID)){
+            var tmpArray = SocketIdAvaiableMap.get(customID);
+            tmpArray.push(obj);
+        }else{
+            var tmpArry = [];
+            tmpArry.push(obj);
+            SocketIdAvaiableMap.set(customID,tmpArry);
+        }*/
+        
+        
         console.log('obj.roomId =',obj.RoomId);
         console.log('obj.socketId =',obj.RoomOwnerSocketId);
         console.log('obj.avaliable =',obj.Avaliable);
@@ -143,6 +183,7 @@ io.on('connection', function(socket){
           console.log('obj.socketId =',obj.RoomOwnerSocketId);
           console.log('obj.avaliable =',obj.Avaliable);
         }
+        
     }else{
         console.log('room is duplecated!!!!!');
         var to = io.sockets.connected[socket.id];
@@ -155,11 +196,69 @@ io.on('connection', function(socket){
   });
 
 
+  function getAvaiableRoom(customID ){
+      var socketIds = [];
+      for (var i in SocketIdAvaiableArray){
+          console.log('-------------------');
+          var obj = SocketIdAvaiableArray[i];
+          console.log('obj.CustomId = ',obj.CustomId);
+          console.log('obj.RoomId = ',obj.RoomId);
+          console.log('obj.RoomOwnerSocketId = ',obj.RoomOwnerSocketId);
+          console.log('obj.Avaliable = ',obj.Avaliable);
+          console.log('obj.CallerSocketId = ',obj.CallerSocketId);
+          if( (obj.CustomId === customID ) && obj.Avaliable == 1 ){
+            var socketId = obj.RoomOwnerSocketId;
+            //SocketIdAvaiableArray[i].CallerSocketId = socket.id;
+            console.log('socketId =',socketId);
+            socketIds.push(socketId);  
+            //socket.room = obj.RoomId;
+            //SocketIdAvaiableArray[i].Avaliable = 0;
+            
+          }
+      }
+      console.log('-------------------');
+
+      return socketIds;
+  }
+
+  function printAvaiableArray(){
+    for (var i in SocketIdAvaiableArray){
+          console.log('-------------------');
+          var obj = SocketIdAvaiableArray[i];
+          console.log('obj.CustomId = ',obj.CustomId);
+          console.log('obj.RoomId = ',obj.RoomId);
+          console.log('obj.RoomOwnerSocketId = ',obj.RoomOwnerSocketId);
+          console.log('obj.Avaliable = ',obj.Avaliable);
+          console.log('obj.CallerSocketId = ',obj.CallerSocketId);
+      }
+      console.log('-------------------');
+
+  }
+
+  function getRandomRoom(socketIds ,sockedid){
+    console.log('getRandomRoom : socketIds = ', socketIds);
+    var RandomsocketIds = [];
+    var size = socketIds.length;
+    console.log('getRandomRoom: size =',size);
+    var index = Math.floor(Math.random() * size );
+    console.log('getRandomRoom: index',index);
+    RandomsocketIds.push(socketIds[index]);
+    SocketIdAvaiableArray[index].Avaliable = 0;
+    SocketIdAvaiableArray[index].CallerSocketId = sockedid;
+    socket.room = SocketIdAvaiableArray[index].RoomId;
+    printAvaiableArray();
+
+    return RandomsocketIds;
+  }
   
-  socket.on('callerjoin', function(callback){
-    console.log('caller join');
+  socket.on('callerjoin' , function(customID,callback){
+    console.log('caller join: customID = ',customID);
     //var socketIds = socketIdsInRoom(name);
-    var socketIds = [];
+    var socketIds = getAvaiableRoom(customID );
+    socketIds = getRandomRoom(socketIds ,socket.id);
+    
+    console.log('caller join: random id :',socketIds);
+    /*var socketIds = [];
     console.log('SocketIdAvaiableArray size = ',SocketIdAvaiableArray.length);
     for (var i in SocketIdAvaiableArray){
       var obj = SocketIdAvaiableArray[i];
@@ -176,7 +275,7 @@ io.on('connection', function(socket){
         SocketIdAvaiableArray[i].Avaliable = 0;
         break;
       }
-    }
+    }*/
     callback(socketIds);
     
     //socket.join(name);

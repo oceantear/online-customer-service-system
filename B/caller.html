@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
-<h1 id="customID" name="A" style ="display: none;">A</h1>
+<h1 id="customID" name="B" style ="display: none;">B</h1>
 <div id="textRoom" style="display: none;">
   <div id="textRoomContent">
     <h3>Text Room</h3>
@@ -16,13 +16,14 @@
 <video id="selfView" autoplay></video>
 <div id="remoteViewContainer"></div>
 <div id="roomIDContainer">
-  <input id="roomID" value="abc">
+  <!--<input id="roomID" value="abc"> -->
   <button onclick="press();">Join/Create room</button>
 </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
 var socket = io();
+var customID = null;
 
 var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.msRTCPeerConnection;
 var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
@@ -56,24 +57,39 @@ function getLocalStream() {
   }, logError);
 }
 
-function calleejoin(roomID) {
-  console.log('calleejoin');
-  var customID = document.getElementById("customID").getAttribute("name");
-  console.log('customID = ',customID);
-  socket.emit('calleejoin', customID+'_'+roomID ,customID+'_');
-}
-
 /*function join(roomID) {
   socket.emit('join', roomID, function(socketIds){
     console.log('join', socketIds);
     for (var i in socketIds) {
+      //console.log('createPC');
       var socketId = socketIds[i];
       createPC(socketId, true);
     }
   });
 }*/
 
+function join() {
+  socket.emit('callerjoin', customID, function(socketIds){
+    console.log('join', socketIds);
+    var socketId = socketIds[0];
+    if(typeof socketId !== 'undefined' && socketId){
+        console.log('caller join: socketId = ',socketId);
+        createPC(socketId, true);
+        roomIDContainer.style.display = "none";
+    }else{
+        console.log('NO free room');
+        alert("All operator is busy. Please call later!");
+    }
+    /*for (var i in socketIds) {
+      //console.log('createPC');
+      var socketId = socketIds[i];
+      createPC(socketId, true);
+    }*/
+  });
+}
+
 function createPC(socketId, isOffer) {
+  console.log('createPC', socketId);	
   var pc = new RTCPeerConnection(configuration);
   pcPeers[socketId] = pc;
 
@@ -154,7 +170,6 @@ function createPC(socketId, isOffer) {
 function exchange(data) {
   var fromId = data.from;
   var pc;
-  console.log('callee exchange(): fromId:',fromId);
   if (fromId in pcPeers) {
     pc = pcPeers[fromId];
   } else {
@@ -162,16 +177,22 @@ function exchange(data) {
   }
 
   if (data.sdp) {
-    console.log('callee exchange(): sdp', data);
+    console.log('exchange sdp', data);
     pc.setRemoteDescription(new RTCSessionDescription(data.sdp), function () {
-      if (pc.remoteDescription.type == "offer")
-        pc.createAnswer(function(desc) {
-          console.log('createAnswer', desc);
-          pc.setLocalDescription(desc, function () {
-            console.log('setLocalDescription', pc.localDescription);
-            socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
+        console.log('pc.remoteDescription.type = ',pc.remoteDescription.type);
+      if (pc.remoteDescription.type == "offer"){
+          console.log('offeeeeeeeer')
+          pc.createAnswer(function(desc) {
+            console.log('createAnswer', desc);
+            pc.setLocalDescription(desc, function () {
+                console.log('setLocalDescription', pc.localDescription);
+                socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
+            }, logError);
           }, logError);
-        }, logError);
+      
+      }else {
+          console.log('not offer')      
+      }
     }, logError);
   } else {
     console.log('exchange candidate', data);
@@ -180,17 +201,16 @@ function exchange(data) {
 }
 
 function leave(socketId) {
-  console.log('callee leave', socketId);
+  console.log('leave', socketId);
+  alert("operator offline!!!!");
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];
   var video = document.getElementById("remoteView" + socketId);
-  console.log('leave : video = ',video);
   if (video) video.remove();
 }
 
 socket.on('exchange', function(data){
-  console.log('callee exchange()');
   exchange(data);
 });
 socket.on('leave', function(socketId){
@@ -201,33 +221,27 @@ socket.on('connect', function(data) {
   console.log('connect');
   getLocalStream();
 });
-    
-socket.on('duplicatedRoomId',function(data) {
-  console.log('duplicatedRoomId');
-  
-  var roomIDContainer = document.getElementById('roomIDContainer');
-  console.log('roomIDContainer = ',roomIDContainer);
-      
-  roomIDContainer.style.display = "inline";
-  alert("duplicated Room Id!!!!");
-});
-    
-    
+
 function logError(error) {
   console.log("logError", error);
 }
 
 function press() {
-  var roomID = document.getElementById('roomID').value;
+  customID = document.getElementById("customID").getAttribute("name");
+  customID = customID +'_';
+  console.log('customID = ',customID);
+    /*
+   roomID = document.getElementById('roomID').value;
   if (roomID == "") {
     alert('Please enter room ID');
   } else {
+  
     var roomIDContainer = document.getElementById('roomIDContainer');
-    //roomIDContainer.parentElement.removeChild(roomIDContainer);
-      roomIDContainer.style.display = "none";
-    //join(roomID);
-    calleejoin(roomID);
+    roomIDContainer.parentElement.removeChild(roomIDContainer);
+    join();
   }
+    */
+    join();
 }
 function textRoomPress() {
   var text = document.getElementById('textRoomInput').value;
