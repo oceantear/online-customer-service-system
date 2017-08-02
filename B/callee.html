@@ -46,6 +46,8 @@ var configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 var pcPeers = {};
 var selfView = document.getElementById("selfView");
 var remoteViewContainer = document.getElementById("remoteViewContainer");
+var roomIDContainer = document.getElementById('roomIDContainer');
+var textRoom = document.getElementById('textRoom');
 var localStream;
 var callerId;
 
@@ -140,7 +142,7 @@ function createPC(socketId, isOffer) {
 
     dataChannel.onopen = function () {
       console.log('dataChannel.onopen');
-      var textRoom = document.getElementById('textRoom');
+      //var textRoom = document.getElementById('textRoom');
       textRoom.style.display = "block";
     };
 
@@ -154,14 +156,14 @@ function createPC(socketId, isOffer) {
 }
 
 function exchange(data) {
-  var fromId = data.from;
-  callerId = fromId;
+  //var fromId = data.from;
+  callerId = data.from;
   var pc;
-  console.log('callee exchange(): fromId:',fromId);
-  if (fromId in pcPeers) {
-    pc = pcPeers[fromId];
+  console.log('callee exchange(): fromId:',callerId);
+  if (callerId in pcPeers) {
+    pc = pcPeers[callerId];
   } else {
-    pc = createPC(fromId, false);
+    pc = createPC(callerId, false);
   }
 
   if (data.sdp) {
@@ -172,7 +174,7 @@ function exchange(data) {
           console.log('createAnswer', desc);
           pc.setLocalDescription(desc, function () {
             console.log('setLocalDescription', pc.localDescription);
-            socket.emit('exchange', {'to': fromId, 'sdp': pc.localDescription });
+            socket.emit('exchange', {'to': callerId, 'sdp': pc.localDescription });
           }, logError);
         }, logError);
     }, logError);
@@ -187,10 +189,10 @@ function leave(socketId) {
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];
-  var roomIDContainer = document.getElementById('roomIDContainer');
-      roomIDContainer.style.display = "block";
-  var textRoom = document.getElementById('textRoom');
-      textRoom.style.display = "none";
+  //var roomIDContainer = document.getElementById('roomIDContainer');
+      //roomIDContainer.style.display = "block";
+  //var textRoom = document.getElementById('textRoom');
+      //textRoom.style.display = "none";
   var video = document.getElementById("remoteView" + socketId);
   console.log('leave : video = ',video);
   if (video) video.remove();
@@ -203,6 +205,7 @@ socket.on('exchange', function(data){
 });
 socket.on('leave', function(socketId){
   leave(socketId);
+  
 });
 
 socket.on('connect', function(data) {
@@ -212,15 +215,16 @@ socket.on('connect', function(data) {
 
 socket.on('disconnect', function(data){
   console.log('disconnect to server');
-  //alert("operator offline!!!!");
   leave(callerId);
+  roomIDContainer.style.display = "block";
+  textRoom.style.display = "none";
 });
     
 socket.on('duplicatedRoomId',function(data) {
   console.log('duplicatedRoomId');
   
-  var roomIDContainer = document.getElementById('roomIDContainer');
-  console.log('roomIDContainer = ',roomIDContainer);
+  //var roomIDContainer = document.getElementById('roomIDContainer');
+  //console.log('roomIDContainer = ',roomIDContainer);
       
   roomIDContainer.style.display = "inline";
   alert("duplicated Room Id!!!!");
@@ -236,7 +240,7 @@ function press() {
   if (roomID == "") {
     alert('Please enter room ID');
   } else {
-    var roomIDContainer = document.getElementById('roomIDContainer');
+    //var roomIDContainer = document.getElementById('roomIDContainer');
     //roomIDContainer.parentElement.removeChild(roomIDContainer);
       roomIDContainer.style.display = "none";
     //join(roomID);

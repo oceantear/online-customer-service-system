@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
-<h1 id="customID" name="A" style ="display: none;">A</h1>
+<h1 id="customID" name="B" style ="display: none;">B</h1>
 <div id="textRoom" style="display: none;">
   <div id="textRoomContent">
     <h3>Text Room</h3>
@@ -78,6 +78,7 @@ function join() {
     if(typeof CalleeSocketId !== 'undefined' && CalleeSocketId){
         console.log('caller join: socketId = ',CalleeSocketId);
         createPC(CalleeSocketId, true);
+        var roomIDContainer = document.getElementById('roomIDContainer');
         roomIDContainer.style.display = "none";
     }else{
         console.log('NO free room');
@@ -217,9 +218,7 @@ function leave(socketId) {
 
   var video = document.getElementById("remoteView" + socketId);
   if (video) video.remove();
-  var textRoom = document.getElementById('textRoom');
-      textRoom.style.display = "block";
-      roomIDContainer.style.display = "none";
+
 
 }
 
@@ -239,6 +238,7 @@ socket.on('disconnect', function(data){
   console.log('disconnect!!!!!');
   //alert("operator offline!!!!");
   leave(CalleeSocketId);
+  location.reload();
 });
 
 function logError(error) {

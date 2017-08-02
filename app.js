@@ -244,7 +244,7 @@ io.on('connection', function(socket){
     var RandomsocketIds = [];
     var size = socketIds.length;
     console.log('getRandomRoom: size =',size);
-    if(size == 0){
+    if(size > 0){
       var index = Math.floor(Math.random() * size );
       console.log('getRandomRoom: index',index);
       RandomsocketIds.push(socketIds[index]);

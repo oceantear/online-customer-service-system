@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
-<h1 id="customID" name="A" style ="display: none;">A</h1>
+<h1 id="customID" name="B" style ="display: none;">B</h1>
 <div id="textRoom" style="display: none;">
   <div id="textRoomContent">
     <h3>Text Room</h3>
@@ -187,10 +187,10 @@ function leave(socketId) {
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];
-  //var roomIDContainer = document.getElementById('roomIDContainer');
-  //    roomIDContainer.style.display = "block";
-  //var textRoom = document.getElementById('textRoom');
-  //    textRoom.style.display = "none";
+  var roomIDContainer = document.getElementById('roomIDContainer');
+      roomIDContainer.style.display = "block";
+  var textRoom = document.getElementById('textRoom');
+      textRoom.style.display = "none";
   var video = document.getElementById("remoteView" + socketId);
   console.log('leave : video = ',video);
   if (video) video.remove();
