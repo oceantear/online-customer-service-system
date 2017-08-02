@@ -21,7 +21,7 @@ if (process.env.LOCAL) {
 }
 //var io = require('socket.io')(server);
 var io = require('socket.io')(server,{
-  pingInterval: 10000,
+  pingInterval: 2000,
   pingTimeout: 5000
 });
 
