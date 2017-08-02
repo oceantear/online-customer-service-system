@@ -47,6 +47,7 @@ var pcPeers = {};
 var selfView = document.getElementById("selfView");
 var remoteViewContainer = document.getElementById("remoteViewContainer");
 var localStream;
+var callerId;
 
 function getLocalStream() {
   navigator.getUserMedia({ "audio": true, "video": true }, function (stream) {
@@ -81,6 +82,7 @@ function createPC(socketId, isOffer) {
     console.log('onicecandidate', event);
     if (event.candidate) {
       socket.emit('exchange', {'to': socketId, 'candidate': event.candidate });
+
     }
   };
 
@@ -153,6 +155,7 @@ function createPC(socketId, isOffer) {
 
 function exchange(data) {
   var fromId = data.from;
+  callerId = fromId;
   var pc;
   console.log('callee exchange(): fromId:',fromId);
   if (fromId in pcPeers) {
@@ -184,9 +187,14 @@ function leave(socketId) {
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];
+  //var roomIDContainer = document.getElementById('roomIDContainer');
+  //    roomIDContainer.style.display = "block";
+  //var textRoom = document.getElementById('textRoom');
+  //    textRoom.style.display = "none";
   var video = document.getElementById("remoteView" + socketId);
   console.log('leave : video = ',video);
   if (video) video.remove();
+  
 }
 
 socket.on('exchange', function(data){
@@ -200,6 +208,12 @@ socket.on('leave', function(socketId){
 socket.on('connect', function(data) {
   console.log('connect');
   getLocalStream();
+});
+
+socket.on('disconnect', function(data){
+  console.log('disconnect to server');
+  //alert("operator offline!!!!");
+  leave(callerId);
 });
     
 socket.on('duplicatedRoomId',function(data) {

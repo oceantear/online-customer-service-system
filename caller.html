@@ -48,6 +48,7 @@ var pcPeers = {};
 var selfView = document.getElementById("selfView");
 var remoteViewContainer = document.getElementById("remoteViewContainer");
 var localStream;
+var CalleeSocketId;
 
 function getLocalStream() {
   navigator.getUserMedia({ "audio": true, "video": true }, function (stream) {
@@ -68,13 +69,15 @@ function getLocalStream() {
   });
 }*/
 
+
+
 function join() {
   socket.emit('callerjoin', customID, function(socketIds){
     console.log('join', socketIds);
-    var socketId = socketIds[0];
-    if(typeof socketId !== 'undefined' && socketId){
-        console.log('caller join: socketId = ',socketId);
-        createPC(socketId, true);
+    CalleeSocketId = socketIds[0];
+    if(typeof CalleeSocketId !== 'undefined' && CalleeSocketId){
+        console.log('caller join: socketId = ',CalleeSocketId);
+        createPC(CalleeSocketId, true);
         roomIDContainer.style.display = "none";
     }else{
         console.log('NO free room');
@@ -206,8 +209,18 @@ function leave(socketId) {
   var pc = pcPeers[socketId];
   pc.close();
   delete pcPeers[socketId];
+
+  var textRoom = document.getElementById('textRoom');
+      textRoom.style.display = "none";
+  var roomIDContainer = document.getElementById('roomIDContainer');
+      roomIDContainer.style.display = "block";
+
   var video = document.getElementById("remoteView" + socketId);
   if (video) video.remove();
+  var textRoom = document.getElementById('textRoom');
+      textRoom.style.display = "block";
+      roomIDContainer.style.display = "none";
+
 }
 
 socket.on('exchange', function(data){
@@ -220,6 +233,12 @@ socket.on('leave', function(socketId){
 socket.on('connect', function(data) {
   console.log('connect');
   getLocalStream();
+});
+
+socket.on('disconnect', function(data){
+  console.log('disconnect!!!!!');
+  //alert("operator offline!!!!");
+  leave(CalleeSocketId);
 });
 
 function logError(error) {

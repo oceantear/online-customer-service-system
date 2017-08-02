@@ -19,7 +19,11 @@ if (process.env.LOCAL) {
 } else {
   server = http.createServer(app);
 }
-var io = require('socket.io')(server);
+//var io = require('socket.io')(server);
+var io = require('socket.io')(server,{
+  pingInterval: 10000,
+  pingTimeout: 5000
+});
 
 var roomList = {};
 
@@ -98,8 +102,8 @@ io.on('connection', function(socket){
                 var to = io.sockets.connected[obj.CallerSocketId];
                 console.log('disconnect: to = ', obj.CallerSocketId);
                 if(obj.CallerSocketId){
-                    to.emit('leave', obj.CallerSocketId);
-                    
+                    //to.emit('leave', obj.CallerSocketId);
+                    to.emit('leave', obj.RoomOwnerSocketId);
                 }
                 //delete SocketIdAvaiableArray[i];
                 SocketIdAvaiableArray.splice(i,1);
@@ -240,13 +244,15 @@ io.on('connection', function(socket){
     var RandomsocketIds = [];
     var size = socketIds.length;
     console.log('getRandomRoom: size =',size);
-    var index = Math.floor(Math.random() * size );
-    console.log('getRandomRoom: index',index);
-    RandomsocketIds.push(socketIds[index]);
-    SocketIdAvaiableArray[index].Avaliable = 0;
-    SocketIdAvaiableArray[index].CallerSocketId = sockedid;
-    socket.room = SocketIdAvaiableArray[index].RoomId;
-    printAvaiableArray();
+    if(size == 0){
+      var index = Math.floor(Math.random() * size );
+      console.log('getRandomRoom: index',index);
+      RandomsocketIds.push(socketIds[index]);
+      SocketIdAvaiableArray[index].Avaliable = 0;
+      SocketIdAvaiableArray[index].CallerSocketId = sockedid;
+      socket.room = SocketIdAvaiableArray[index].RoomId;
+      printAvaiableArray();
+    }
 
     return RandomsocketIds;
   }
@@ -256,7 +262,7 @@ io.on('connection', function(socket){
     //var socketIds = socketIdsInRoom(name);
     var socketIds = getAvaiableRoom(customID );
     socketIds = getRandomRoom(socketIds ,socket.id);
-    
+
     console.log('caller join: random id :',socketIds);
     /*var socketIds = [];
     console.log('SocketIdAvaiableArray size = ',SocketIdAvaiableArray.length);
