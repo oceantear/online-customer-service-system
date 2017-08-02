@@ -1,8 +1,16 @@
-# react-native-webrtc-server
-The signaling server for https://github.com/oney/react-native-webrtc   
-You can checkout this demo https://github.com/oney/RCTWebRTCDemo  
-Demo server: https://react-native-webrtc.herokuapp.com/
+This prototype project is for online call center.
+Fork from https://github.com/oney/react-native-webrtc-server
+It supports serveral companys.
 
+
+#Callee
+This is for operator. Operator need to input one room name.
+#Caller
+This is for customer. Customer only need to press one buton for accessing operator.
+System will random find one free operator and connect them each other.
+
+
+You can easy to launch it.
 # Get started
 
 1. `npm install`
