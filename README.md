@@ -4,15 +4,17 @@ Fork from https://github.com/oney/react-native-webrtc-server .
 <pr>It supports serveral companys.</pr>
 
 
-#Callee   
-This is for operator.  
-Operator need to input one room name.  
-#Caller
-This is for customer.  
-Customer only need to press one buton for accessing operator.  
-System will random find one free operator and connect them each other.  
+<pr>#Callee   </pr>
+<br></br>
+<pr> This is for operator. b </pr>
+<br></br>
+<pr>Operator need to input one room name.  </pr>
+<pr>#Caller</pr>
+<pr>This is for customer.  </pr>
+<pr>Customer only need to press one buton for accessing operator.  </pr>
+<pr>System will random find one free operator and connect them each other.  </pr>
   
-You can easy to launch it.
+<pr>You can easy to launch it.</pr>
 # Get started
 
 1. `npm install`
