@@ -4,7 +4,7 @@ Fork from https://github.com/oney/react-native-webrtc-server .
 <pr>It supports serveral companys.</pr>
 
 
-<pr>#Callee</pr>
+#Callee
 <pr>This is for operator. Operator need to input one room name.</pr>
 <pr>#Caller</pr>
 <pr>This is for customer. Customer only need to press one buton for accessing operator.</pr>
