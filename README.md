@@ -1,5 +1,6 @@
 <pr>This prototype project is for online call center.</pr>
-<pr>Fork from https://github.com/oney/react-native-webrtc-server .</pr>
+Fork from https://github.com/oney/react-native-webrtc-server .
+
 <pr>It supports serveral companys.</pr>
 
 
